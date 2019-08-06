@@ -22,14 +22,14 @@ public class region {
     private long StartMajorCompactionTime;
     private long FinishedMajorCompactionTime;
     private String Status;
-    
-    public  region(HRegionInfo HR){
+
+    public region(HRegionInfo HR) {
         this.setHRInfo(HR);
     }
 
     public void doMajorCompact(Admin admin) {
         try {
-            
+
             admin.majorCompactRegion(HRInfo.getRegionName());
 
             this.setStartMajorCompactionTime(dateUtil.getNowUnixtimeMilli());
@@ -45,8 +45,8 @@ public class region {
             System.out.println(dateUtil.getNow("dd/MM/yyyy hh:mm:ss") + "\tDEBUG: \t state \t " + admin.getCompactionStateForRegion(HRInfo.getEncodedNameAsBytes()) + " \t region:" + HRInfo.getRegionNameAsString());
             System.out.println(dateUtil.getNow("dd/MM/yyyy hh:mm:ss") + "\tDEBUG: \t starttime \t " + this.getStartMajorCompactionTime() + " \t region:" + HRInfo.getRegionNameAsString());
             System.out.println(dateUtil.getNow("dd/MM/yyyy hh:mm:ss") + "\tDEBUG: \t endtime \t " + admin.getLastMajorCompactionTimestampForRegion(HRInfo.getRegionName()) + " \t region:" + HRInfo.getRegionNameAsString());
-            System.out.println("Region compacting since " + (dateUtil.getNowUnixtimeMilli() - this.getStartMajorCompactionTime()) + " ms "+ HRInfo.getRegionNameAsString());
-            
+            System.out.println("Region compacting since " + (dateUtil.getNowUnixtimeMilli() - this.getStartMajorCompactionTime()) + " ms " + HRInfo.getRegionNameAsString());
+
             if (admin.getCompactionStateForRegion(HRInfo.getRegionName()).equals(CompactionState.NONE)
                     && admin.getLastMajorCompactionTimestampForRegion(HRInfo.getRegionName()) > this.getStartMajorCompactionTime()) {
                 this.setFinishedMajorCompactionTime(admin.getLastMajorCompactionTimestampForRegion(HRInfo.getRegionName()));

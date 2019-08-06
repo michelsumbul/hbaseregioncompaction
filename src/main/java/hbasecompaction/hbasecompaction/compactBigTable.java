@@ -47,53 +47,48 @@ public class compactBigTable {
             Admin admin = connection.getAdmin();
             TableName t = TableName.valueOf(tableName);
             List<HRegionInfo> l_HRegionTable = admin.getTableRegions(t);
-            
+
             List<region> l_HRegionTable_toCompact = new ArrayList<>();
-            
-            for(HRegionInfo hr : l_HRegionTable){
+
+            for (HRegionInfo hr : l_HRegionTable) {
                 l_HRegionTable_toCompact.add(new region(hr));
-                System.out.println("Region listed for compaction (regionnameasstring) \t" + hr.getRegionNameAsString());
+                System.out.println("Region listed for compaction \t" + hr.getRegionNameAsString());
 
             }
-            
 
             List<region> l_HRegionTable_Compacting = new ArrayList<>();
             List<region> l_HRegionTable_Compacted = new ArrayList<>();
-            
+
             while (l_HRegionTable_toCompact.size() > 0 || l_HRegionTable_Compacting.size() > 0) {
-                
-                  if ((l_HRegionTable_Compacting.size() < concurrency
+
+                if ((l_HRegionTable_Compacting.size() < concurrency
                         || l_HRegionTable_toCompact.size() < concurrency)
                         && l_HRegionTable_toCompact.size() > 0) {
-                      
-                     region r =  l_HRegionTable_toCompact.get(0);
-                     r.doMajorCompact(admin);
-                     
-                      l_HRegionTable_Compacting.add(r);
-                      l_HRegionTable_toCompact.remove(r);
-                      System.out.println("Start compacting " + r.getHRInfo().getRegionNameAsString());
-                      
-                  }
 
-                   for(int i = (l_HRegionTable_Compacting.size() -1); i >= 0; i--){
-                       region r = l_HRegionTable_Compacting.get(i);
-                       if(r.checkEndMajorCompact(admin)){
-                           
-                           l_HRegionTable_Compacted.add(r);
-                           l_HRegionTable_Compacting.remove(r);
-                           long duration = r.getFinishedMajorCompactionTime() - r.getStartMajorCompactionTime();
-                           System.out.println("Finished compacting after " + duration + " ms \t" + r.getHRInfo().getRegionNameAsString());
-                       }
-                   }
-                   System.out.println("Number of regions compacted " + l_HRegionTable_Compacted.size() + " over " + (l_HRegionTable_toCompact.size() + l_HRegionTable_Compacting.size() + l_HRegionTable_Compacted.size()));
-                   
+                    region r = l_HRegionTable_toCompact.get(0);
+                    r.doMajorCompact(admin);
+
+                    l_HRegionTable_Compacting.add(r);
+                    l_HRegionTable_toCompact.remove(r);
+                    System.out.println("Start compacting " + r.getHRInfo().getRegionNameAsString());
+
+                }
+
+                for (int i = (l_HRegionTable_Compacting.size() - 1); i >= 0; i--) {
+                    region r = l_HRegionTable_Compacting.get(i);
+                    if (r.checkEndMajorCompact(admin)) {
+
+                        l_HRegionTable_Compacted.add(r);
+                        l_HRegionTable_Compacting.remove(r);
+                        long duration = r.getFinishedMajorCompactionTime() - r.getStartMajorCompactionTime();
+                        System.out.println("Finished compacting after " + duration + " ms \t" + r.getHRInfo().getRegionNameAsString());
+                    }
+                }
+                System.out.println("Number of regions compacted " + l_HRegionTable_Compacted.size() + " over " + (l_HRegionTable_toCompact.size() + l_HRegionTable_Compacting.size() + l_HRegionTable_Compacted.size()));
+
                 waitSeconds(1);
-                
+
             }
-            
-            
-            
-            
 
         } catch (ZooKeeperConnectionException ex) {
             Logger.getLogger(compactBigTable.class.getName()).log(Level.SEVERE, null, ex);
