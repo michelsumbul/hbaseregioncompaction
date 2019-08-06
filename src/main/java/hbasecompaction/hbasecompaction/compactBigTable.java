@@ -35,55 +35,6 @@ public class compactBigTable {
         doRunCompactionRegionByRegion(args[0], Integer.valueOf(args[1]));
     }
 
-    public void compact(String tableName, Integer concurrency) {
-        Configuration config = HBaseConfiguration.create();
-
-        String path = this.getClass()
-                .getClassLoader()
-                .getResource("hbase-site.xml")
-                .getPath();
-        config.addResource(new Path(path));
-
-        try {
-            HBaseAdmin.checkHBaseAvailable(config);
-            Connection connection = ConnectionFactory.createConnection(config);
-            Admin admin = connection.getAdmin();
-            TableName t = TableName.valueOf(tableName);
-            List<HRegionInfo> l_HRegionTable_toCompact = admin.getTableRegions(t);
-            List<HRegionInfo> l_HRegionTable_Compacting = new ArrayList<>();
-            List<HRegionInfo> l_HRegionTable_Compacted = new ArrayList<>();
-
-            while (l_HRegionTable_toCompact.size() > 0) {
-
-                if ((l_HRegionTable_Compacting.size() < concurrency
-                        || l_HRegionTable_toCompact.size() < concurrency)
-                        && l_HRegionTable_toCompact.size() > 0) {
-
-                    HRegionInfo HR = l_HRegionTable_toCompact.get(0);
-                    l_HRegionTable_Compacting.add(HR);
-                    admin.compactRegion(HR.getEncodedNameAsBytes());
-                    l_HRegionTable_toCompact.remove(HR);
-                }
-
-                for (HRegionInfo HRCompacting : l_HRegionTable_Compacting) {
-                    if (admin.getCompactionStateForRegion(HRCompacting.getEncodedNameAsBytes()).equals(CompactionState.NONE)) {
-
-                        l_HRegionTable_Compacted.add(HRCompacting);
-                        l_HRegionTable_Compacting.remove(HRCompacting);
-
-                    }
-                }
-                waitSeconds(1);
-
-            }
-
-        } catch (ZooKeeperConnectionException ex) {
-            Logger.getLogger(compactBigTable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ServiceException | IOException ex) {
-            Logger.getLogger(compactBigTable.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     public static void doRunCompactionRegionByRegion(String tableName, Integer concurrency) {
         try {
             Configuration config = HBaseConfiguration.create();
