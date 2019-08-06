@@ -28,7 +28,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>lab.devoteam.finder_iptv_log.finder</mainClass>
+                            <mainClass>hbasecompaction.hbasecompaction.compactBigTable</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
